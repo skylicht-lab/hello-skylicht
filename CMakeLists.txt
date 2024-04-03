@@ -29,6 +29,11 @@ set(SKYLICHT_ENGINE_BIN_DIR ${HELLO_SKYLICHT_SOURCE_DIR}/Bin)
 set(SKYLICHT_ENGINE_PROJECT_DIR "${HELLO_SKYLICHT_SOURCE_DIR}/InstallLibs/include")
 set(SKYLICHT_VERSION ${HELLO_SKYLICHT_VERSION})
 
+# bullet engine
+add_definitions(-DUSE_BULLET_PHYSIC_ENGINE)
+add_definitions(-D_IRR_STATIC_LIB_)
+add_definitions(-D_SKYLICHT_STATIC_LIB_)
+
 # debug/release
 if (NOT CMAKE_BUILD_TYPE)
 	# set(CMAKE_BUILD_TYPE "Debug")
@@ -76,3 +81,4 @@ endif()
 include(SkylichtLibrary.cmake)
 
 subdirs(Source/HelloWorld)
+subdirs(Source/Physics)
