@@ -1,6 +1,6 @@
 # This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: CMake on a single platform
+name: Build
 
 on:
   push:
@@ -39,15 +39,17 @@ jobs:
           wget -q https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
           tar -zxvf cmake-3.15.5-Linux-x86_64.tar.gz
 
-      - name: Build
+      - name: Build Skylicht
         run: |
           cd skylicht-engine
           export PATH="./cmake-3.15.5-Linux-x86_64/bin:$PATH"
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON
           cmake --build ./PrjLinux --target install
-          ls -l InstallLibs
           cp -r InstallLibs ../hello-skylicht
           cd ..
+
+      - name: Build Hello-Skylicht
+        run: |
           cd hello-skylicht
           cmake -S. -BPrjLinux
           cmake --build ./PrjLinux
