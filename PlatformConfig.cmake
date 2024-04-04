@@ -1,3 +1,5 @@
+option(USE_OPENMP "Use openmp for multithread optimize" ON)
+
 if (CMAKE_SYSTEM_NAME STREQUAL WindowsStore)
 	set(BUILD_ENGINE_TOOL OFF)
 	set(BUILD_WINDOWS_STORE ON)
