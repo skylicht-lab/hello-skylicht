@@ -41,7 +41,7 @@ jobs:
           cd skylicht-engine
           export PATH="./cmake-3.15.5-Linux-x86_64/bin:$PATH"
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON
-          cmake --build ./PrjLinux --target install --config $BUILD_TYPE
+          cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
           cd ..
 
@@ -50,7 +50,7 @@ jobs:
           cd hello
           ls -l
           cmake -S. -BPrjLinux
-          cmake --build ./PrjLinux --config $BUILD_TYPE
+          cmake --build ./PrjLinux
           cd ..
 
       - name: Package
@@ -86,7 +86,7 @@ jobs:
           cd skylicht-engine
           export PATH="./cmake-3.15.5-Linux-x86_64/bin:$PATH"
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
-          cmake --build ./PrjLinux --target install --config $BUILD_TYPE
+          cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
           cd ..
 
@@ -95,7 +95,7 @@ jobs:
           cd hello
           ls -l
           cmake -S. -BPrjLinux -DUSE_SKYLICHT_SHARED_LIBS=ON
-          cmake --build ./PrjLinux --config $BUILD_TYPE
+          cmake --build ./PrjLinux
           cd ..
 
       - name: Package
@@ -123,7 +123,7 @@ jobs:
           cd skylicht-engine
           echo %BUILD_TYPE%
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DINSTALL_LIBS=ON
-          cmake --build ./PrjVisualStudio --target install --config "%BUILD_TYPE%"
+          cmake --build ./PrjVisualStudio --target install
           cp -r ./InstallLibs ../hello
           cd ..
 
@@ -132,7 +132,7 @@ jobs:
           cd hello
           ls -l
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64
-          cmake --build ./PrjVisualStudio --config "%BUILD_TYPE%"
+          cmake --build ./PrjVisualStudio
           cd ..
 
       - name: Package
@@ -160,7 +160,7 @@ jobs:
           cd skylicht-engine
           echo %BUILD_TYPE%
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
-          cmake --build ./PrjVisualStudio --target install --config "%BUILD_TYPE%"
+          cmake --build ./PrjVisualStudio --target install
           cp -r ./InstallLibs ../hello
           cd ..
 
@@ -169,7 +169,7 @@ jobs:
           cd hello
           ls -l
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64
-          cmake --build ./PrjVisualStudio --config "%BUILD_TYPE%"
+          cmake --build ./PrjVisualStudio
           cd ..
 
       - name: Package
