@@ -121,7 +121,6 @@ jobs:
       - name: Build Skylicht
         run: |
           cd skylicht-engine
-          echo %BUILD_TYPE%
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DINSTALL_LIBS=ON
           cmake --build ./PrjVisualStudio --target install
           cp -r ./InstallLibs ../hello
@@ -158,7 +157,6 @@ jobs:
       - name: Build Skylicht
         run: |
           cd skylicht-engine
-          echo %BUILD_TYPE%
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjVisualStudio --target install
           cp -r ./InstallLibs ../hello
@@ -176,3 +174,43 @@ jobs:
         run: |
           cd hello
           dir Bin
+
+  macosx:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Skylicht Engine
+        uses: actions/checkout@v4
+        with:
+          repository: skylicht-lab/skylicht-engine
+          path: skylicht-engine
+
+      - name: Checkout Project
+        uses: actions/checkout@v4
+        with:
+          path: hello
+
+      - name: Build Skylicht
+        run: |
+          brew install libomp
+          cd skylicht-engine
+          cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 -DINSTALL_LIBS=ON
+          cd PrjMac
+          xcodebuild -configuration Release
+          cd ..
+          cp -r ./InstallLibs ../hello
+          cd ..
+
+      - name: Build Project
+        run: |
+          cd hello
+          ls -l
+          cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
+          cd PrjMac
+          xcodebuild -configuration Release
+          cd ..
+
+      - name: Package
+        run: |
+          cd hello
+          ls -l Bin

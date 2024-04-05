@@ -42,7 +42,7 @@ Build project
 
 ```Shell
 C:\hello-skylicht>cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64
-C:\hello-skylicht>cmake --build ./PrjVisualStudio --config %BUILD_TYPE%
+C:\hello-skylicht>cmake --build ./PrjVisualStudio
 ```
 
 You can see the Github workflow for more details
