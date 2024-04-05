@@ -7,7 +7,7 @@ This is an example project for integrating [Skylicht Engine](https://github.com/
 ## How build
 
 ### Step 1
-You need to clone and build Skylich Engine first.
+First, You need to clone and build [Skylicht Engine](https://github.com/skylicht-lab/skylicht-engine) .
 ```Shell
 C:\>git clone https://github.com/skylicht-lab/skylicht-engine.git
 ```
@@ -31,8 +31,10 @@ Copy 2 folders (cmake and include) from folder build result C:\skylicht-engine\I
 
 ```Shell
 C:\hello-skylicht>md InstallLibs
-C:\hello-skylicht>xcopy C:\skylicht-engine\InstallLibs\cmake InstallLibs /E
-C:\hello-skylicht>xcopy C:\skylicht-engine\InstallLibs\include InstallLibs /E
+C:\hello-skylicht>md InstallLibs\cmake
+C:\hello-skylicht>md InstallLibs\include
+C:\hello-skylicht>xcopy C:\skylicht-engine\InstallLibs\cmake InstallLibs\cmake /E
+C:\hello-skylicht>xcopy C:\skylicht-engine\InstallLibs\include InstallLibs\include /E
 ```
 ### Step 3
 
@@ -44,3 +46,4 @@ C:\hello-skylicht>cmake --build ./PrjVisualStudio --config %BUILD_TYPE%
 ```
 
 You can see the Github workflow for more details
+Thanks you!
