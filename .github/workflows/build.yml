@@ -1,6 +1,6 @@
 # This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: Build
+name: build
 
 on:
   push:
@@ -18,13 +18,13 @@ jobs:
 
     steps:
       - name: Checkout Skylicht Engine
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           repository: skylicht-lab/skylicht-engine
           path: skylicht-engine
 
       - name: Checkout Project
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           path: hello
 
@@ -63,13 +63,13 @@ jobs:
 
     steps:
       - name: Checkout Skylicht Engine
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           repository: skylicht-lab/skylicht-engine
           path: skylicht-engine
 
       - name: Checkout Project
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           path: hello
 
@@ -108,13 +108,13 @@ jobs:
 
     steps:
       - name: Checkout Skylicht Engine
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           repository: skylicht-lab/skylicht-engine
           path: skylicht-engine
 
       - name: Checkout Project
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           path: hello
 
@@ -144,13 +144,13 @@ jobs:
 
     steps:
       - name: Checkout Skylicht Engine
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           repository: skylicht-lab/skylicht-engine
           path: skylicht-engine
 
       - name: Checkout Project
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
         with:
           path: hello
 
