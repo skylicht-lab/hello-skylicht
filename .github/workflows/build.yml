@@ -168,7 +168,7 @@ jobs:
         run: |
           cd hello
           dir
-          cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64
+          cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DUSE_SKYLICHT_SHARED_LIBS
           cmake --build ./PrjVisualStudio
           cd ..
 
