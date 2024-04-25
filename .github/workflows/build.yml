@@ -32,14 +32,10 @@ jobs:
         run: |
           sudo apt-get update -y -qq
           sudo apt-get install -y libglfw3-dev libopenal-dev libx11-dev
-          sudo apt remove --purge --auto-remove cmake
-          wget -q https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
-          tar -zxvf cmake-3.15.5-Linux-x86_64.tar.gz
 
       - name: Build Skylicht
         run: |
           cd skylicht-engine
-          export PATH="./cmake-3.15.5-Linux-x86_64/bin:$PATH"
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON
           cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
@@ -77,14 +73,10 @@ jobs:
         run: |
           sudo apt-get update -y -qq
           sudo apt-get install -y libglfw3-dev libopenal-dev libx11-dev
-          sudo apt remove --purge --auto-remove cmake
-          wget -q https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.tar.gz
-          tar -zxvf cmake-3.15.5-Linux-x86_64.tar.gz
 
       - name: Build Skylicht
         run: |
           cd skylicht-engine
-          export PATH="./cmake-3.15.5-Linux-x86_64/bin:$PATH"
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
