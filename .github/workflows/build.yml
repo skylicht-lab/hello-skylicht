@@ -49,6 +49,13 @@ jobs:
           cmake --build ./PrjLinux
           cd ..
 
+      - name: Unit Test
+        run: |
+          cd PrjLinux
+          ctest --verpose
+          cat Testing/Temporary/LastTest.log
+          cd ..
+
       - name: Package
         run: |
           cd hello
@@ -90,6 +97,13 @@ jobs:
           cmake --build ./PrjLinux
           cd ..
 
+      - name: Unit Test
+        run: |
+          cd PrjLinux
+          ctest --verpose
+          cat Testing/Temporary/LastTest.log
+          cd ..
+
       - name: Package
         run: |
           cd hello
@@ -124,6 +138,13 @@ jobs:
           dir
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64
           cmake --build ./PrjVisualStudio
+          cd ..
+
+        - name: Unit Test
+        run: |
+          cd PrjVisualStudio
+          ctest --verpose
+          cat Testing/Temporary/LastTest.log
           cd ..
 
       - name: Package
@@ -162,6 +183,13 @@ jobs:
           cmake --build ./PrjVisualStudio
           cd ..
 
+        - name: Unit Test
+        run: |
+          cd PrjVisualStudio
+          ctest --verpose
+          cat Testing/Temporary/LastTest.log
+          cd ..
+
       - name: Package
         run: |
           cd hello
@@ -198,6 +226,13 @@ jobs:
           cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
           cd PrjMac
           xcodebuild -configuration Release
+          cd ..
+
+      - name: Unit Test
+        run: |
+          cd PrjMac
+          ctest --verpose -C Release
+          cat Testing/Temporary/LastTest.log
           cd ..
 
       - name: Package
