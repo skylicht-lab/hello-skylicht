@@ -51,10 +51,10 @@ jobs:
 
       - name: Unit Test
         run: |
-          cd PrjLinux
+          cd hello/PrjLinux
           ctest --verpose
           cat Testing/Temporary/LastTest.log
-          cd ..
+          cd ../..
 
       - name: Package
         run: |
@@ -99,10 +99,10 @@ jobs:
 
       - name: Unit Test
         run: |
-          cd PrjLinux
+          cd hello/PrjLinux
           ctest --verpose
           cat Testing/Temporary/LastTest.log
-          cd ..
+          cd ../..
 
       - name: Package
         run: |
@@ -142,10 +142,10 @@ jobs:
 
       - name: Unit Test
         run: |
-          cd PrjVisualStudio
+          cd hello/PrjVisualStudio
           ctest --verpose
           cat Testing/Temporary/LastTest.log
-          cd ..
+          cd ../..
 
       - name: Package
         run: |
@@ -185,10 +185,10 @@ jobs:
 
       - name: Unit Test
         run: |
-          cd PrjVisualStudio
+          cd hello/PrjVisualStudio
           ctest --verpose
           cat Testing/Temporary/LastTest.log
-          cd ..
+          cd ../..
 
       - name: Package
         run: |
@@ -230,10 +230,10 @@ jobs:
 
       - name: Unit Test
         run: |
-          cd PrjMac
+          cd hello/PrjMac
           ctest --verpose -C Release
           cat Testing/Temporary/LastTest.log
-          cd ..
+          cd ../..
 
       - name: Package
         run: |
