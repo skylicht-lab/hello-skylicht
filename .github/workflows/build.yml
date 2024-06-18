@@ -100,7 +100,7 @@ jobs:
 
       - name: Unit Test
         run: |
-          ls hello/Bin
+          ls -l hello/Bin
           cd hello/PrjLinux
           ctest --verpose
           cat Testing/Temporary/LastTest.log
@@ -144,6 +144,7 @@ jobs:
 
       - name: Unit Test
         run: |
+          dir hello/Bin/Release
           cd hello/PrjVisualStudio
           ctest --verpose -C Release
           cat Testing/Temporary/LastTest.log
@@ -174,7 +175,7 @@ jobs:
         run: |
           cd skylicht-engine
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
-          cmake --build ./PrjVisualStudio --target install
+          cmake --build ./PrjVisualStudio --target install --config "Release"
           cp -r ./InstallLibs ../hello
           md ../hello/Bin/Release
           cp ./InstallLibs/*.dll ../hello/Bin/Release
@@ -190,6 +191,7 @@ jobs:
 
       - name: Unit Test
         run: |
+          dir hello/Bin/Release
           cd hello/PrjVisualStudio
           ctest --verpose -C Release
           cat Testing/Temporary/LastTest.log
