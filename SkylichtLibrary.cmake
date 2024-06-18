@@ -2,7 +2,7 @@
 # skylicht-engine\BuildCommand\InstallLibVCPrj2022.cmd
 set(SKYLICHT_TARGETS_DIR "./InstallLibs/cmake")
 
-option(USE_SKYLICHT_SHARED_LIBS "Use skylicht shared libraries" ON)
+option(USE_SKYLICHT_SHARED_LIBS "Use skylicht shared libraries" OFF)
 option(USE_OPENMP "Use openmp for multithread optimize" ON)
 
 include(SkylichtConfig.cmake)
@@ -60,13 +60,15 @@ endif()
 include(${SKYLICHT_TARGETS_DIR}/ThirdPartyTargets.cmake)
 include(${SKYLICHT_TARGETS_DIR}/SystemTargets.cmake)
 include(${SKYLICHT_TARGETS_DIR}/IrrlichtTargets.cmake)
-include(${SKYLICHT_TARGETS_DIR}/EngineTargets.cmake)
 
 # skylicht audio
 if (BUILD_SKYLICHT_AUDIO)
 add_definitions(-DBUILD_SKYLICHT_AUDIO)
 include(${SKYLICHT_TARGETS_DIR}/AudioTargets.cmake)
 endif()
+
+# skylicht engine
+include(${SKYLICHT_TARGETS_DIR}/EngineTargets.cmake)
 
 # skylicht components
 if (BUILD_SKYLICHT_COMPONENTS)
