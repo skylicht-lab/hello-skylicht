@@ -86,7 +86,7 @@ endif()
 if (BUILD_SKYLICHT_PHYSIC)
 add_definitions(-DBUILD_SKYLICHT_PHYSIC)
 # bullet engine
-if (USE_BULLET_PHYSIC_ENGINE)
+if (BUILD_BULLET_PHYSIC_LIB)
 add_definitions(-DUSE_BULLET_PHYSIC_ENGINE)
 include(${SKYLICHT_TARGETS_DIR}/LinearMathTargets.cmake)
 include(${SKYLICHT_TARGETS_DIR}/Bullet3CommonTargets.cmake)
