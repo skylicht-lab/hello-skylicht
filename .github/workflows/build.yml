@@ -140,7 +140,7 @@ jobs:
           cmake --build ./PrjVisualStudio
           cd ..
 
-        - name: Unit Test
+      - name: Unit Test
         run: |
           cd PrjVisualStudio
           ctest --verpose
@@ -183,7 +183,7 @@ jobs:
           cmake --build ./PrjVisualStudio
           cd ..
 
-        - name: Unit Test
+      - name: Unit Test
         run: |
           cd PrjVisualStudio
           ctest --verpose
