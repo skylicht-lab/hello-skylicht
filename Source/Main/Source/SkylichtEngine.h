@@ -25,12 +25,20 @@ https://github.com/skylicht-lab/skylicht-engine
 #pragma once
 
 // Config
-#include "SkylichtAudioAPI.h"
-#include "SkylichtSystemAPI.h"
-#include "CollisionConfig.h"
 #include "SkylichtConfig.h"
+#include "SkylichtSystemAPI.h"
+
+#ifdef BUILD_SKYLICHT_AUDIO
+#include "SkylichtAudioAPI.h"
+#endif
+
+#ifdef BUILD_SKYLICHT_COLLISION
 #include "CollisionConfig.h"
+#endif
+
+#ifdef BUILD_SKYLICHT_COMPONENTS
 #include "ComponentsConfig.h"
+#endif
 
 #include "CApplication.h"
 
@@ -65,12 +73,18 @@ https://github.com/skylicht-lab/skylicht-engine
 #include "Camera/CCamera.h"
 #include "Camera/CEditorCamera.h"
 #include "Camera/CFpsMoveCamera.h"
+#include "Camera/C3rdCamera.h"
+#include "Camera/CCameraBrain.h"
+
 #include "GameObject/CGameObject.h"
 #include "GameObject/CZone.h"
+
 #include "Lighting/CDirectionalLight.h"
 #include "Lighting/CPointLight.h"
 #include "IndirectLighting/CIndirectLighting.h"
+
 #include "ReflectionProbe/CReflectionProbe.h"
+#include "LightProbes/CLightProbe.h"
 
 // Graphics2D, Canvas 2D
 #include "Projective/CProjective.h"
@@ -90,12 +104,18 @@ https://github.com/skylicht-lab/skylicht-engine
 #include "Entity/CEntityManager.h"
 #include "Entity/CEntityPrefab.h"
 
+// Culling
+#include "Culling/CCullingData.h"
+
 // 3D Model
 #include "MeshManager/CMeshManager.h"
-#include "RenderMesh/CRenderMesh.h"
 #include "RenderMesh/CMesh.h"
 #include "RenderMesh/CSkinnedMesh.h"
-#include "Culling/CCullingData.h"
+#include "RenderMesh/CRenderMesh.h"
+#include "RenderMesh/CRenderMeshInstancing.h"
+
+// OcclusionQuery
+#include "OcclusionQuery/COcclusionQuery.h"
 
 // 3D Animation
 #include "Animation/CAnimationManager.h"
@@ -122,3 +142,12 @@ https://github.com/skylicht-lab/skylicht-engine
 #include "Utils/CMemoryStream.h"
 #include "Utils/XMLSpreadsheet/CXMLSpreadsheet.h"
 #include "Utils/XMLSpreadsheet/CXMLTableData.h"
+
+// Tween
+#include "Tween/CTweenManager.h"
+#include "Tween/CTweenColor.h"
+#include "Tween/CTweenFloat.h"
+#include "Tween/CTweenMatrix4.h"
+#include "Tween/CTweenQuaternion.h"
+#include "Tween/CTweenVector3df.h"
+#include "Tween/CTweenVector2df.h"
