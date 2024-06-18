@@ -100,6 +100,7 @@ jobs:
 
       - name: Unit Test
         run: |
+          ls hello/Bin
           cd hello/PrjLinux
           ctest --verpose
           cat Testing/Temporary/LastTest.log
@@ -184,7 +185,7 @@ jobs:
           cd hello
           dir
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DUSE_SKYLICHT_SHARED_LIBS=ON
-          cmake --build ./PrjVisualStudio
+          cmake --build ./PrjVisualStudio --config "Release"
           cd ..
 
       - name: Unit Test
