@@ -87,7 +87,7 @@ jobs:
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
-          cp ./InstallLibs/lib/*.* ../hello/Bin
+          sudo cp ./InstallLibs/lib/*.so /usr/lib
           cd ..
 
       - name: Build Project
