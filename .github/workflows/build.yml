@@ -87,7 +87,6 @@ jobs:
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
-          echo $LD_LIBRARY_PATH
           sudo cp ./InstallLibs/lib/*.so /usr/lib
           cd ..
 
@@ -103,7 +102,7 @@ jobs:
         run: |
           ls -l hello/Bin
           cd hello/PrjLinux
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
+          echo $LD_LIBRARY_PATH
           ctest --verpose
           cat Testing/Temporary/LastTest.log
           cd ../..
