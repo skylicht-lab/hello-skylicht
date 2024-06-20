@@ -21,8 +21,8 @@ endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	set(BUILD_LINUX ON)
-	add_definitions(-DLINUX)
 	set(CMAKE_SKIP_RPATH TRUE)
+	add_definitions(-DLINUX)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL Darwin OR CMAKE_SYSTEM_NAME STREQUAL iOS)

@@ -87,7 +87,7 @@ jobs:
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjLinux --target install
           cp -r ./InstallLibs ../hello
-          sudo cp ./InstallLibs/lib/*.so /usr/lib
+          sudo cp ./InstallLibs/lib/*.so ../hello/Bin
           cd ..
 
       - name: Build Project
@@ -101,8 +101,8 @@ jobs:
       - name: Unit Test
         run: |
           ls -l hello/Bin
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/runner/work/hello-skylicht/hello-skylicht/hello/Bin
           cd hello/PrjLinux
-          echo $LD_LIBRARY_PATH
           ctest --verpose
           cat Testing/Temporary/LastTest.log
           cd ../..
