@@ -107,7 +107,7 @@ endif()
 if (BUILD_SKYLICHT_NETWORK)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 set(BUILD_OPENSSL ON)
-endif
+endif()
 add_definitions(-DBUILD_SKYLICHT_NETWORK)
 include(${SKYLICHT_TARGETS_DIR}/NetworkTargets.cmake)
 endif()
