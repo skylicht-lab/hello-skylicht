@@ -105,6 +105,9 @@ include(${SKYLICHT_TARGETS_DIR}/CryptoLibTargets.cmake)
 endif()
 
 if (BUILD_SKYLICHT_NETWORK)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+set(BUILD_OPENSSL ON)
+endif
 add_definitions(-DBUILD_SKYLICHT_NETWORK)
 include(${SKYLICHT_TARGETS_DIR}/NetworkTargets.cmake)
 endif()
