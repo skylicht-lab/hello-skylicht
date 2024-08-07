@@ -52,7 +52,7 @@ jobs:
       - name: Unit Test
         run: |
           cd hello/PrjLinux
-          ctest --verpose
+          ctest
           cat Testing/Temporary/LastTest.log
           cd ../..
 
@@ -138,7 +138,7 @@ jobs:
         run: |
           dir hello/Bin/Release
           cd hello/PrjVisualStudio
-          ctest --verpose -C Release
+          ctest -C Release
           cat Testing/Temporary/LastTest.log
           cd ../..
 
@@ -186,7 +186,7 @@ jobs:
         run: |
           dir hello/Bin/Release
           cd hello/PrjVisualStudio
-          ctest --verpose -C Release
+          ctest -C Release
           cat Testing/Temporary/LastTest.log
           cd ../..
 
@@ -232,7 +232,7 @@ jobs:
       - name: Unit Test
         run: |
           cd hello/PrjMac
-          ctest --verpose -C Release
+          ctest -C Release
           cat Testing/Temporary/LastTest.log
           cd ../..
 
