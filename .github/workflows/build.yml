@@ -155,6 +155,7 @@ jobs:
       - name: Checkout Skylicht Engine
         uses: actions/checkout@v4
         with:
+          lfs: true
           repository: skylicht-lab/skylicht-engine
           path: skylicht-engine
 
@@ -203,6 +204,7 @@ jobs:
       - name: Checkout Skylicht Engine
         uses: actions/checkout@v4
         with:
+          lfs: true
           repository: skylicht-lab/skylicht-engine
           path: skylicht-engine
 

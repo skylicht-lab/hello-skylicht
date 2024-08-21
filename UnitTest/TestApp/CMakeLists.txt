@@ -71,4 +71,23 @@ else()
 	add_test(NAME TestApp COMMAND $<TARGET_FILE:TestApp>)
 endif()
 
+if (BUILD_OPENSSL AND MSVC)
+	if (CMAKE_CL_64)
+		set(openssl_lib_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/boringssl/x64")
+		set(openssl_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/boringssl/x64/*.dll")
+	else()
+		set(openssl_lib_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/boringssl/x86")
+		set(openssl_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/boringssl/x86/*.dll")
+	endif()	
+	link_directories(${openssl_lib_path})
+endif()
+
+#OPENSSL
+if (BUILD_OPENSSL AND MSVC)
+	file(GLOB_RECURSE openssl_bin_files ${openssl_dll_path})
+	foreach(openssl_bin ${openssl_bin_files})
+		add_custom_command(TARGET SampleHelloWorld POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${openssl_bin} $<TARGET_FILE_DIR:TestApp>)
+	endforeach()
+endif()
+
 set_target_properties(TestApp PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")

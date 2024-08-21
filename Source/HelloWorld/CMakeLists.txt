@@ -340,7 +340,7 @@ endif()
 if (BUILD_OPENSSL AND MSVC)
 	file(GLOB_RECURSE openssl_bin_files ${openssl_dll_path})
 	foreach(openssl_bin ${openssl_bin_files})
-		add_custom_command(TARGET SampleHelloWorld POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${openssl_bin} $<TARGET_FILE_DIR:SkylichtEditor>)
+		add_custom_command(TARGET SampleHelloWorld POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${openssl_bin} $<TARGET_FILE_DIR:SampleHelloWorld>)
 	endforeach()
 endif()
 
