@@ -79,7 +79,7 @@ if (BUILD_OPENSSL AND MSVC)
 		set(openssl_lib_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/boringssl/x86")
 		set(openssl_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/boringssl/x86/*.dll")
 	endif()	
-	link_directories(${openssl_lib_path})
+	target_link_directories(TestApp PUBLIC ${openssl_lib_path})
 endif()
 
 #OPENSSL
