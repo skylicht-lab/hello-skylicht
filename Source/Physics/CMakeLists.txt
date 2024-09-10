@@ -19,7 +19,7 @@ if (BUILD_IMGUI)
 	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Imgui)
 endif()
 
-set(template_path ${HELLO_SKYLICHT_SOURCE_DIR}/Main)
+set(template_path ${HELLO_SKYLICHT_SOURCE_DIR}/Source/Main)
 
 file(GLOB_RECURSE application_source 
 	./Source/**.cpp 
