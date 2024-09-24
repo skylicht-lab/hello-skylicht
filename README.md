@@ -4,7 +4,7 @@ This is an example project for integrating [Skylicht Engine](https://github.com/
 
 [![Build status](https://github.com/skylicht-lab/hello-skylicht/workflows/build/badge.svg)](https://github.com/skylicht-lab/hello-skylicht/actions?workflow=build)
 
-## How build
+## How to build
 
 ### Step 1
 First, You need to clone and build [Skylicht Engine](https://github.com/skylicht-lab/skylicht-engine) .
