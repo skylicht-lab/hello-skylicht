@@ -1,6 +1,12 @@
 # Target of install library from https://github.com/skylicht-lab/skylicht-engine
 # skylicht-engine\BuildCommand\InstallLibVCPrj2022.cmd
-set(SKYLICHT_TARGETS_DIR "./InstallLibs/cmake")
+set(SKYLICHT_TARGETS_DIR "./InstallLibs/cmake/${CMAKE_SYSTEM_NAME}")
+
+if (CMAKE_SYSTEM_NAME STREQUAL Android)
+	set(SKYLICHT_TARGETS_DIR ${SKYLICHT_TARGETS_DIR}/${ANDROID_ABI})
+elseif (CMAKE_SYSTEM_NAME STREQUAL iOS)
+	set(SKYLICHT_TARGETS_DIR ${SKYLICHT_TARGETS_DIR}/${PLATFORM})
+endif()
 
 option(USE_SKYLICHT_SHARED_LIBS "Use skylicht shared libraries" OFF)
 option(USE_OPENMP "Use openmp for multithread optimize" ON)
@@ -130,3 +136,6 @@ if (BUILD_IMGUI)
 add_definitions(-DBUILD_IMGUI)
 include(${SKYLICHT_TARGETS_DIR}/ImguiTargets.cmake)
 endif()
+
+# skylight editor ui
+include(${SKYLICHT_TARGETS_DIR}/EditorGUITargets.cmake)
