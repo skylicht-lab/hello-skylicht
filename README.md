@@ -26,16 +26,6 @@ Clone this project
 ```Shell
 C:\>git clone https://github.com/skylicht-lab/hello-skylicht.git
 ```
-
-Copy 2 folders (cmake and include) from folder build result C:\skylicht-engine\InstallLibs to this project
-
-```Shell
-C:\hello-skylicht>md InstallLibs
-C:\hello-skylicht>md InstallLibs\cmake
-C:\hello-skylicht>md InstallLibs\include
-C:\hello-skylicht>xcopy C:\skylicht-engine\InstallLibs\cmake InstallLibs\cmake /E
-C:\hello-skylicht>xcopy C:\skylicht-engine\InstallLibs\include InstallLibs\include /E
-```
 ### Step 3
 
 Build project

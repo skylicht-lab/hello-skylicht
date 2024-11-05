@@ -1,6 +1,6 @@
 # Target of install library from https://github.com/skylicht-lab/skylicht-engine
 # skylicht-engine\BuildCommand\InstallLibVCPrj2022.cmd
-set(SKYLICHT_TARGETS_DIR "./InstallLibs/cmake/${CMAKE_SYSTEM_NAME}")
+set(SKYLICHT_TARGETS_DIR "../skylicht-engine/InstallLibs/cmake/${CMAKE_SYSTEM_NAME}")
 
 if (CMAKE_SYSTEM_NAME STREQUAL Android)
 	set(SKYLICHT_TARGETS_DIR ${SKYLICHT_TARGETS_DIR}/${ANDROID_ABI})
@@ -138,4 +138,6 @@ include(${SKYLICHT_TARGETS_DIR}/ImguiTargets.cmake)
 endif()
 
 # skylight editor ui
+if (BUILD_ENGINE_TOOL)
 include(${SKYLICHT_TARGETS_DIR}/EditorGUITargets.cmake)
+endif()

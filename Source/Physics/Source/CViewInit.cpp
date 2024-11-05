@@ -7,12 +7,15 @@
 
 #include "Primitive/CPlane.h"
 #include "Primitive/CCube.h"
+#include "Primitive/CSphere.h"
+
+#include "SkyDome/CSkyDome.h"
 
 #include "PhysicsEngine/CPhysicsEngine.h"
 #include "Collider/CStaticPlaneCollider.h"
 #include "Collider/CBoxCollider.h"
+#include "Collider/CSphereCollider.h"
 #include "RigidBody/CRigidbody.h"
-#include "SkySun/CSkySun.h"
 
 CViewInit::CViewInit() :
 	m_initState(CViewInit::DownloadBundles),
@@ -94,36 +97,45 @@ void CViewInit::initScene()
 	guiCamera->setProjectionType(CCamera::OrthoUI);
 
 	// sky
-	CSkySun* skySun = zone->createEmptyObject()->addComponent<CSkySun>();
+	ITexture* skyDomeTexture = CTextureManager::getInstance()->getTexture("Common/Textures/Sky/PaperMill.png");
+	if (skyDomeTexture != NULL)
+	{
+		CSkyDome* skyDome = zone->createEmptyObject()->addComponent<CSkyDome>();
+		skyDome->setData(skyDomeTexture, SColor(255, 255, 255, 255));
+	}
+
+	// reflection probe
+	CGameObject* reflectionProbeObj = zone->createEmptyObject();
+	CReflectionProbe* reflection = reflectionProbeObj->addComponent<CReflectionProbe>();
+	reflection->loadStaticTexture("Common/Textures/Sky/PaperMill");
 
 	// plane
-	CGameObject* grid = zone->createEmptyObject();
-	grid->setName("Plane");
+	CContainerObject* planePhysics = zone->createContainerObject();
+	planePhysics->setName("Plane");
 
-	CPlane* plane = grid->addComponent<CPlane>();
+	planePhysics->addComponent<Physics::CStaticPlaneCollider>();
+	Physics::CRigidbody* body = planePhysics->addComponent<Physics::CRigidbody>();
+	body->setDynamic(false); // this is kinematic
+	body->initRigidbody();
+
+	CGameObject* planeObject = planePhysics->createEmptyObject();
+	CPlane* plane = planeObject->addComponent<CPlane>();
 	plane->getMaterial()->changeShader("BuiltIn/Shader/SpecularGlossiness/Deferred/MetersGrid.xml");
 
 	// indirect lighting
-	grid->addComponent<CIndirectLighting>();
-
-	grid->addComponent<Physics::CStaticPlaneCollider>();
-	Physics::CRigidbody* body = grid->addComponent<Physics::CRigidbody>();
-	body->setDynamic(false); // kinematic
-	body->initRigidbody();
+	planeObject->addComponent<CIndirectLighting>();
 
 	// scale plane for render
 	core::matrix4 m;
 	m.setScale(core::vector3df(100.0, 1.0f, 100.0f));
-	grid->getTransform()->setRelativeTransform(m);
+	planeObject->getTransform()->setRelativeTransform(m);
 
-	// that will disable replace transform in next update
-	body->notifyUpdateTransform(false);
 
 	// Cube 1
 	CGameObject* cubeObj = zone->createEmptyObject();
 	cubeObj->setName("Cube 1");
 
-	// Change to forwarder material
+	// cube & material
 	CCube* cube = cubeObj->addComponent<CCube>();
 	CMaterial* material = cube->getMaterial();
 	material->changeShader("BuiltIn/Shader/SpecularGlossiness/Deferred/Color.xml");
@@ -138,8 +150,14 @@ void CViewInit::initScene()
 	body->setPosition(core::vector3df(0.0f, 5.0f, 0.0f));
 	body->setRotation(core::vector3df(45.0f, 45.0f, 0.0f));
 	body->syncTransform();
-	body->OnCollision = [](Physics::CRigidbody* bodyA, Physics::CRigidbody* bodyB, Physics::SCollisionContactPoint* colliderInfo, int numContact)
+	body->OnCollision = [](Physics::ICollisionObject* a, Physics::ICollisionObject* b, Physics::SCollisionContactPoint* colliderInfo, int numContact)
 		{
+			Physics::CRigidbody* bodyA = dynamic_cast<Physics::CRigidbody*>(a);
+			Physics::CRigidbody* bodyB = dynamic_cast<Physics::CRigidbody*>(b);
+
+			if (bodyA == NULL || bodyB == NULL)
+				return;
+
 			if (bodyA->getState() != Physics::CRigidbody::Sleep ||
 				bodyB->getState() != Physics::CRigidbody::Sleep)
 			{
@@ -157,7 +175,7 @@ void CViewInit::initScene()
 	cubeObj = zone->createEmptyObject();
 	cubeObj->setName("Cube 2");
 
-	// Change to forwarder material
+	// cube & material
 	cube = cubeObj->addComponent<CCube>();
 	material = cube->getMaterial();
 	material->changeShader("BuiltIn/Shader/SpecularGlossiness/Deferred/Color.xml");
@@ -170,8 +188,14 @@ void CViewInit::initScene()
 	body->initRigidbody();
 	body->setPosition(core::vector3df(0.0f, 10.0f, 0.0f));
 	body->syncTransform();
-	body->OnCollision = [](Physics::CRigidbody* bodyA, Physics::CRigidbody* bodyB, Physics::SCollisionContactPoint* colliderInfo, int numContact)
+	body->OnCollision = [](Physics::ICollisionObject* a, Physics::ICollisionObject* b, Physics::SCollisionContactPoint* colliderInfo, int numContact)
 		{
+			Physics::CRigidbody* bodyA = dynamic_cast<Physics::CRigidbody*>(a);
+			Physics::CRigidbody* bodyB = dynamic_cast<Physics::CRigidbody*>(b);
+
+			if (bodyA == NULL || bodyB == NULL)
+				return;
+
 			if (bodyA->getState() != Physics::CRigidbody::Sleep ||
 				bodyB->getState() != Physics::CRigidbody::Sleep)
 			{
@@ -184,6 +208,26 @@ void CViewInit::initScene()
 				os::Printer::log(log);
 			}
 		};
+
+	// Sphere
+	CGameObject* sphereObj = zone->createEmptyObject();
+	sphereObj->setName("Sphere");
+
+	// cube & material
+	CSphere* sphere = sphereObj->addComponent<CSphere>();
+	material = sphere->getMaterial();
+	material->changeShader("BuiltIn/Shader/SpecularGlossiness/Deferred/Color.xml");
+
+	// indirect lighting
+	sphereObj->addComponent<CIndirectLighting>();
+	sphereObj->addComponent<Physics::CSphereCollider>();
+	body = sphereObj->addComponent<Physics::CRigidbody>();
+	body->setRollingFriction(0.02f);
+	body->setSpinningFriction(0.02f);
+	body->initRigidbody();
+	body->setPosition(core::vector3df(1.0f, 5.0f, 0.0f));
+	body->syncTransform();
+
 
 	// lighting
 	CGameObject* lightObj = zone->createEmptyObject();
@@ -225,6 +269,7 @@ void CViewInit::onUpdate()
 		io::IFileSystem* fileSystem = getApplication()->getFileSystem();
 
 		std::vector<std::string> listBundles;
+		listBundles.push_back("Common.zip");
 
 #ifdef __EMSCRIPTEN__
 		const char* filename = listBundles[m_downloaded].c_str();
@@ -269,13 +314,7 @@ void CViewInit::onUpdate()
 		for (std::string& bundle : listBundles)
 		{
 			const char* r = bundle.c_str();
-#if defined(WINDOWS_STORE)
 			fileSystem->addFileArchive(getBuiltInPath(r), false, false);
-#elif defined(MACOS)
-			fileSystem->addFileArchive(getBuiltInPath(r), false, false);
-#else
-			fileSystem->addFileArchive(r, false, false);
-#endif
 		}
 
 		m_initState = CViewInit::InitScene;
@@ -337,11 +376,6 @@ void CViewInit::onRender()
 			probes.push_back(lightProbe);
 
 			lm->bakeProbes(probes, bakeCamera, rp, scene->getEntityManager());
-
-			// bake reflection probe
-			CGameObject* reflectionProbeObj = zone->createEmptyObject();
-			CReflectionProbe* reflection = reflectionProbeObj->addComponent<CReflectionProbe>();
-			reflection->bakeProbe(bakeCamera, rp, scene->getEntityManager());
 		}
 	}
 	else
