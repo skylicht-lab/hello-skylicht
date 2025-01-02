@@ -130,6 +130,18 @@ add_definitions(-DBUILD_SKYLICHT_UI)
 include(${SKYLICHT_TARGETS_DIR}/UserInterfaceTargets.cmake)
 endif()
 
+# skylicht graph
+if (BUILD_SKYLICHT_GRAPH)
+add_definitions(-DBUILD_SKYLICHT_GRAPH)
+include(${SKYLICHT_TARGETS_DIR}/GraphTargets.cmake)
+endif()
+
+# spine-runtime
+if (BUILD_SPINE_RUNTIMES)
+add_definitions(-DBUILD_SPINE_RUNTIMES)
+include(${SKYLICHT_TARGETS_DIR}/SpineRuntimesTargets.cmake)
+endif()
+
 include(${SKYLICHT_TARGETS_DIR}/ClientTargets.cmake)
 
 if (BUILD_IMGUI)
@@ -138,6 +150,6 @@ include(${SKYLICHT_TARGETS_DIR}/ImguiTargets.cmake)
 endif()
 
 # skylight editor ui
-if (BUILD_ENGINE_TOOL)
+if (BUILD_EDITOR_TOOL)
 include(${SKYLICHT_TARGETS_DIR}/EditorGUITargets.cmake)
 endif()
