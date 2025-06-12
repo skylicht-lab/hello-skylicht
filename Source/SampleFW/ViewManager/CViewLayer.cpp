@@ -88,6 +88,30 @@ bool CViewLayer::onBack()
 	return true;
 }
 
+void CViewLayer::pushView(CView* view)
+{
+	if (m_views.size() > 0)
+		m_views[0]->onDeactive();
+
+	m_views.insert(m_views.begin(), view);
+	view->onInit();
+	view->onData();
+}
+
+bool CViewLayer::changeView(CView* view)
+{
+	if (m_views.size() > 0)
+	{
+		m_willDeleteView.push_back(m_views[0]);
+		m_views.erase(m_views.begin());
+
+		m_views.insert(m_views.begin(), view);
+		view->onInit();
+		view->onData();
+		return true;
+	}
+	return false;
+}
 
 void CViewLayer::popView()
 {
@@ -103,13 +127,10 @@ void CViewLayer::popView()
 
 void CViewLayer::popAllView()
 {
-	if (m_views.size() > 0)
+	while (m_views.size() > 0)
 	{
 		m_willDeleteView.push_back(m_views[0]);
-
 		m_views.erase(m_views.begin());
-		if (m_views.size() > 0)
-			m_views[0]->onActive();
 	}
 }
 
@@ -117,9 +138,13 @@ void CViewLayer::popAllViewBefore(CView* s)
 {
 	while (m_views.size() > 0)
 	{
-		m_willDeleteView.push_back(m_views[0]);
+		if (m_views[0] == s)
+			return;
 
-		m_views.erase(m_views.begin());
+		size_t id = m_views.size() - 1;
+
+		m_willDeleteView.push_back(m_views[id]);
+		m_views.erase(m_views.begin() + id);
 	}
 }
 
@@ -131,7 +156,6 @@ void CViewLayer::popAllViewTo(CView* s)
 			return;
 
 		m_willDeleteView.push_back(m_views[0]);
-
 		m_views.erase(m_views.begin());
 	}
 }

@@ -37,6 +37,15 @@ CScene* CContext::initScene()
 	return m_scene;
 }
 
+CScene* CContext::initScene(CScene* scene)
+{
+	m_scene = scene;
+#ifdef BUILD_SKYLICHT_COLLISION
+	m_collisionMgr = new CCollisionManager();
+#endif
+	return m_scene;
+}
+
 void CContext::releaseScene()
 {
 	if (m_scene != NULL)
@@ -124,7 +133,7 @@ CBaseRP* CContext::initShadowForwarderPipeline(int w, int h, bool postEffect)
 	{
 		// post processor
 		m_postProcessor = new CPostProcessorRP();
-		m_postProcessor->enableAutoExposure(false);
+		m_postProcessor->enableAutoExposure(true);
 		m_postProcessor->enableBloomEffect(true);
 		m_postProcessor->enableFXAA(true);
 		m_postProcessor->enableScreenSpaceReflection(false);
@@ -215,6 +224,7 @@ void CContext::releaseRenderPipeline()
 {
 	if (m_beginRP != m_rendering &&
 		m_beginRP != m_forwardRP &&
+		m_beginRP != m_lightmapRP &&
 		m_beginRP != m_shadowMapRendering)
 	{
 		// delete customRP
