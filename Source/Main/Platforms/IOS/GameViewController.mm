@@ -72,7 +72,7 @@ SkylichtApplication* _angleApplication = NULL;
     savePath = [savePath stringByAppendingFormat:@"/"];
     [savePath getCString:path maxLength:1024 encoding:NSASCIIStringEncoding];
     _angleApplication->setSaveFolder(path);
-	_angleApplication->initialize();
+    _angleApplication->initialize();
 }
 
 - (void)dealloc
