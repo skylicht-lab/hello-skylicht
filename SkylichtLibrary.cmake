@@ -1,15 +1,24 @@
 # Target of install library from https://github.com/skylicht-lab/skylicht-engine
 # skylicht-engine\BuildCommand\InstallLibVCPrj2022.cmd
-set(SKYLICHT_TARGETS_DIR "../skylicht-engine/InstallLibs/cmake/${CMAKE_SYSTEM_NAME}")
+set(SKYLICHT_TARGETS_DIR "${SKYLICHT_ENGINE_INSTALL_DIR}/cmake/${CMAKE_SYSTEM_NAME}")
+set(SKYLICHT_ARCHITECTURE ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID})
+
+option(USE_SKYLICHT_SHARED_LIBS "Use skylicht shared libraries" OFF)
+option(USE_OPENMP "Use openmp for multithread optimize" ON)
+
+if (USE_SKYLICHT_SHARED_LIBS)
+	set(SKYLICHT_LIBRARY_TYPE "Shared")
+else()
+	set(SKYLICHT_LIBRARY_TYPE "Static")
+endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL Android)
 	set(SKYLICHT_TARGETS_DIR ${SKYLICHT_TARGETS_DIR}/${ANDROID_ABI})
 elseif (CMAKE_SYSTEM_NAME STREQUAL iOS)
 	set(SKYLICHT_TARGETS_DIR ${SKYLICHT_TARGETS_DIR}/${PLATFORM})
+else()
+	set(SKYLICHT_TARGETS_DIR ${SKYLICHT_TARGETS_DIR}/${SKYLICHT_LIBRARY_TYPE}/${SKYLICHT_ARCHITECTURE})
 endif()
-
-option(USE_SKYLICHT_SHARED_LIBS "Use skylicht shared libraries" OFF)
-option(USE_OPENMP "Use openmp for multithread optimize" ON)
 
 include(SkylichtConfig.cmake)
 include(PlatformConfig.cmake)

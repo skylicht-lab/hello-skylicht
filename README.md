@@ -43,8 +43,7 @@ You can modify the skylicht-engine path from **CMakeLists.txt**
 ```Shell
 ...
 # SKYLICHT SETUP
-set(SKYLICHT_ENGINE_BIN_DIR ${HELLO_SKYLICHT_SOURCE_DIR}/Bin)
-set(SKYLICHT_ENGINE_PROJECT_DIR "${HELLO_SKYLICHT_SOURCE_DIR}/../skylicht-engine/InstallLibs/include")
+set(SKYLICHT_ENGINE_INSTALL_DIR "${HELLO_SKYLICHT_SOURCE_DIR}/../skylicht-engine/InstallLibs")
 ...
 ```
 
