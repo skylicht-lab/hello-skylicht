@@ -85,7 +85,7 @@ jobs:
           cd skylicht-engine
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjLinux --target install
-          sudo cp ./InstallLibs/lib/Linux/*.so ../hello/Bin
+          sudo cp ./InstallLibs/lib/Linux/Shared/*.so ../hello/Bin
           cd ..
 
       - name: Build Project
@@ -166,7 +166,7 @@ jobs:
           cmake -S . -B ./PrjVisualStudio -G "Visual Studio 17 2022" -A x64 -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjVisualStudio --target install --config "Release"
           md ../hello/Bin/Release
-          cp ./InstallLibs/bin/Windows/*.dll ../hello/Bin/Release
+          cp ./InstallLibs/bin/Windows/x64/*.dll ../hello/Bin/Release
           cp ./Projects/ThirdPartySDK/boringssl/x64/*.dll ../hello/Bin/Release
           cd ..
 
