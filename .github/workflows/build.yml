@@ -319,6 +319,7 @@ jobs:
           export ANDROID_JNILIBS_PATH=Source/Android/app/src/main/jniLibs
           export ANDROID_ASSET_PATH=Source/Android/app/src/main/assets
           export ANDROID_BUNDLE_PATH=Source/Android/appdata/src/main/assets
+          mkdir ./$ANDROID_JNILIBS_PATH
           mkdir ./$ANDROID_JNILIBS_PATH/$ABI
           cp Bin/Android/Libs/$ABI/$APP_NAME $ANDROID_JNILIBS_PATH/$ABI
           cp Bin/BuiltIn.zip $ANDROID_BUNDLE_PATH
