@@ -236,3 +236,42 @@ jobs:
         run: |
           cd hello
           ls -l Bin
+
+  ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Skylicht Engine
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          repository: skylicht-lab/skylicht-engine
+          path: skylicht-engine
+
+      - name: Checkout Project
+        uses: actions/checkout@v4
+        with:
+          path: hello
+
+      - name: Build Skylicht
+        run: |
+          brew install libomp
+          cd skylicht-engine
+          xcodebuild -downloadPlatform iOS
+          cmake -S . -B ./PrjIOS -G Xcode -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=./ios.cmake -DINSTALL_LIBS=ON -DPLATFORM=SIMULATORARM64
+          cmake --build ./PrjIOS --target install --config Release
+          cd ..
+
+      - name: Build Project
+        run: |
+          cd hello
+          ls -l
+          cmake -S . -B ./PrjIOS -G Xcode -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=./ios.cmake -DPLATFORM=SIMULATORARM64 -DBUILD_SHARED_LIBS=OFF
+          cd PrjIOS
+          xcodebuild -configuration Release
+          cd ..
+
+      - name: Package
+        run: |
+          cd hello
+          ls -l Bin

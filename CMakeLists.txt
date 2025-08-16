@@ -59,6 +59,14 @@ option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC Runtime Library DLL (/MD or /MDd)"
 # unicode library
 add_definitions(-DUNICODE -D_UNICODE)
 
+if (BUILD_SHARED_LIBS)
+	message(STATUS "Building dynamic libs")
+	set(ENGINE_SHARED_OR_STATIC_LIB "SHARED")
+else()
+	message(STATUS "Building static libs")
+	set(ENGINE_SHARED_OR_STATIC_LIB "STATIC")
+endif()
+
 # visual studio
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
