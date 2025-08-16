@@ -266,6 +266,7 @@ jobs:
           ls -l
           cmake -S . -B ./PrjIOS -G Xcode -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=./ios.cmake -DPLATFORM=OS64 -DBUILD_SHARED_LIBS=OFF
           cd PrjIOS
+          xcodebuild -downloadPlatform iOS
           xcodebuild -configuration Release -alltargets -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY=""
           cd ..
 
@@ -310,7 +311,20 @@ jobs:
           cmake --build ./PrjAndroid-$ABI --config Release
           cd ..
 
-      - name: Package
+      - name: Build Android AAB
         run: |
           cd hello
-          ls -l Bin/Release
+          export ABI=arm64-v8a
+          export APP_NAME=libSampleHelloWorld.so
+          export ANDROID_JNILIBS_PATH=Source/Android/app/src/main/jniLibs
+          export ANDROID_ASSET_PATH=Source/Android/app/src/main/assets
+          export ANDROID_BUNDLE_PATH=Source/Android/appdata/src/main/assets
+          mkdir ./$ANDROID_JNILIBS_PATH/$ABI
+          cp Bin/Android/Libs/$ABI/$APP_NAME $ANDROID_JNILIBS_PATH/$ABI
+          cp Bin/BuiltIn.zip $ANDROID_BUNDLE_PATH
+          cd Source/Android
+          chmod +x ./gradlew
+          ./gradlew bundleDebug
+          ls -l app/build/outputs/bundle/debug
+          cd ../..
+          cd ..
