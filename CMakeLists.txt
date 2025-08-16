@@ -60,10 +60,10 @@ option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC Runtime Library DLL (/MD or /MDd)"
 add_definitions(-DUNICODE -D_UNICODE)
 
 if (BUILD_SHARED_LIBS)
-	message(STATUS "Building dynamic libs")
+	message(STATUS "Use dynamic libs")
 	set(ENGINE_SHARED_OR_STATIC_LIB "SHARED")
 else()
-	message(STATUS "Building static libs")
+	message(STATUS "Use static libs")
 	set(ENGINE_SHARED_OR_STATIC_LIB "STATIC")
 endif()
 
