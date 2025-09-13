@@ -38,14 +38,6 @@ set(SKYLICHT_EDITOR_ROOT_DIR ${HELLO_SKYLICHT_SOURCE_DIR})
 
 set(SKYLICHT_VERSION ${HELLO_SKYLICHT_VERSION})
 
-# debug/release
-if (NOT CMAKE_BUILD_TYPE)
-	# set(CMAKE_BUILD_TYPE "Debug")
-	set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-message(STATUS "- System: ${CMAKE_SYSTEM_NAME} - BuildType: ${CMAKE_BUILD_TYPE}")
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 endif()
@@ -92,11 +84,18 @@ endif()
 
 include(SkylichtLibrary.cmake)
 
+if (BUILD_MACOS)
+set(SKYLICHT_EDITOR_INSTALL OFF)
+endif()
+
+if (BUILD_EDITOR_TOOL)
+# you can copy Editor source to here
+# Replace CMakeLists.txt with CShared.txt
+subdirs(Source/Editor)
+endif()
+
 subdirs(Source/HelloWorld)
 subdirs(Source/Physics)
-
-# you can copy Editor source to here
-# subdirs(Source/Editor)
 
 # unit test
 if (NOT BUILD_ANDROID AND NOT BUILD_IOS AND NOT BUILD_EMSCRIPTEN AND NOT BUILD_WINDOWS_STORE)
