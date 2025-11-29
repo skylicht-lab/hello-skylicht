@@ -58,7 +58,7 @@ if (BUILD_SKYLICHT_GRAPH)
 	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Graph)
 endif()
 
-set(template_path ${SKYLICHT_ENGINE_PROJECT_DIR}/Main)
+set(template_path ${HELLO_SKYLICHT_SOURCE_DIR}/Main)
 
 file(GLOB_RECURSE application_source 
 	./Source/**.cpp 
