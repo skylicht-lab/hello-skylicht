@@ -1,32 +1,72 @@
 include_directories(
 	${HELLO_SKYLICHT_SOURCE_DIR}/Source/Physics/Source
-	${HELLO_SKYLICHT_SOURCE_DIR}/Source/SampleFW
-	${HELLO_SKYLICHT_SOURCE_DIR}/Source/Main
+	${HELLO_SKYLICHT_SOURCE_DIR}/Main
 	${SKYLICHT_ENGINE_PROJECT_DIR}/Irrlicht/Include
 	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/System
 	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Engine
-	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Components
-	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Collision
-	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Physics
 	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Client
-	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Lightmapper
-	${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Audio
+	${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdParty
 	${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdParty/freetype2/include
-	${SKYLICHT_ENGINE_PROJECT_DIR}/Bullet3
 )
+
+if (BUILD_SKYLICHT_AUDIO)
+	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Audio)
+endif()
+
+if (BUILD_SKYLICHT_LIGHMAPPER)
+	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Lightmapper)
+endif()
+
+if (BUILD_SKYLICHT_COMPONENTS)
+	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Components)
+endif()
+
+if (BUILD_SKYLICHT_COLLISION)
+	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Collision)
+endif()
 
 if (BUILD_IMGUI)
 	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Imgui)
 endif()
 
-set(template_path ${HELLO_SKYLICHT_SOURCE_DIR}/Source/Main)
+if (BUILD_SKYLICHT_PHYSIC)
+	include_directories(
+		${SKYLICHT_ENGINE_PROJECT_DIR}/Bullet3/src
+		${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Physics
+	)
+endif()
+
+if (BUILD_SPINE_RUNTIMES)
+	include_directories(
+		${SKYLICHT_ENGINE_PROJECT_DIR}/SpineCpp/spine-cpp/include
+		${SKYLICHT_ENGINE_PROJECT_DIR}/SpineCpp/spine-runtimes
+	)
+endif()
+
+if (BUILD_SKYLICHT_UI)
+	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/UserInterface)
+endif()
+
+if (BUILD_SKYLICHT_NETWORK)
+	include_directories(
+		${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Crypto
+		${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Network
+	)
+endif()
+
+if (BUILD_SKYLICHT_GRAPH)
+	include_directories(${SKYLICHT_ENGINE_PROJECT_DIR}/Skylicht/Graph)
+endif()
+
+set(template_path ${SKYLICHT_ENGINE_PROJECT_DIR}/Main)
 
 file(GLOB_RECURSE application_source 
 	./Source/**.cpp 
 	./Source/**.c 
-	./Source/**.h
-	../SampleFW/**.cpp
-	../SampleFW/**.h)
+	./Source/**.h)
+
+# Custom additional sources
+include(CMakeProject.cmake)
 
 setup_project_group("${application_source}" ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -123,24 +163,23 @@ endif()
 
 if (BUILD_DEBUG_VLD)
 	if (CMAKE_CL_64)
-		set(vld_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/Vld/bin/Win64/*.*")
+		set(vld_dll_path "${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdPartySDK/Vld/bin/Win64/*.*")
 	else()
-		set(vld_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/Vld/bin/Win32/*.*")
-	endif()	
-	link_directories(${vld_lib_path})
+		set(vld_dll_path "${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdPartySDK/Vld/bin/Win32/*.*")
+	endif()
 endif()
 	
 if (BUILD_SDL AND MSVC)
 	if (CMAKE_CL_64)
-		set(sdl_lib_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/SDL/lib/x64")
-		set(sdl_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/SDL/lib/x64/*.dll")
+		set(sdl_lib_path "${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdPartySDK/SDL/lib/x64")
+		set(sdl_dll_path "${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdPartySDK/SDL/lib/x64/*.dll")
 	else()
-		set(sdl_lib_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/SDL/lib/x86")
-		set(sdl_dll_path "${SKYLICHT_EDITOR_SOURCE_DIR}/ThirdPartySDK/SDL/lib/x86/*.dll")
+		set(sdl_lib_path "${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdPartySDK/SDL/lib/x86")
+		set(sdl_dll_path "${SKYLICHT_ENGINE_PROJECT_DIR}/ThirdPartySDK/SDL/lib/x86/*.dll")
 	endif()	
 	link_directories(${sdl_lib_path})
 endif()
-	
+
 if (MINGW OR CYGWIN)
 	# .rc build
 	set(CMAKE_RC_COMPILER_INIT windres)
@@ -222,11 +261,13 @@ elseif (BUILD_MACOS)
 		BUILD_WITH_INSTALL_RPATH 1
 		INSTALL_RPATH "@executable_path/../Frameworks"
 	)
+	
+	set_target_properties(SamplePhysics PROPERTIES XCODE_ATTRIBUTE_INSTALL_PATH $(LOCAL_APPS_DIR))
 elseif (BUILD_IOS)
 	set(MACOSX_BUNDLE_EXECUTABLE_NAME SamplePhysics)
 
 	set(APP_NAME "SamplePhysics")
-	set(APP_BUNDLE_IDENTIFIER "com.skylicht.samplephysics")
+	set(APP_BUNDLE_IDENTIFIER "com.team_name.project_name")
 	set(CODE_SIGN_IDENTITY "iPhone Developer")
 
 	set(PRODUCT_NAME ${APP_NAME})
@@ -266,12 +307,15 @@ elseif (BUILD_IOS)
 	set_target_properties(SamplePhysics PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ${CODE_SIGN_IDENTITY})
 	set_target_properties(SamplePhysics PROPERTIES XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY ${DEVICE_FAMILY})
 	set_target_properties(SamplePhysics PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${template_path}/Platforms/IOS/plist.in")
-	
+	set_target_properties(SamplePhysics PROPERTIES XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon)
+	set_target_properties(SamplePhysics PROPERTIES XCODE_ATTRIBUTE_INSTALL_PATH $(LOCAL_APPS_DIR))
+
 	# add assets icon
 	target_sources(SamplePhysics PRIVATE "${template_path}/Platforms/IOS/Assets.xcassets")
 	
 	list (APPEND platform_ios_resources "${template_path}/Platforms/IOS/Assets.xcassets")
-	set_target_properties(SamplePhysics PROPERTIES RESOURCE "${resources_files} ${platform_ios_resources}")
+	list (APPEND platform_ios_resources "${resources_files}")
+	set_target_properties(SamplePhysics PROPERTIES RESOURCE "${platform_ios_resources}")
 
 	# link framework
 	target_link_libraries(SamplePhysics "-framework Foundation")
@@ -281,6 +325,7 @@ elseif (BUILD_IOS)
 	target_link_libraries(SamplePhysics "-framework MetalKit")
 	target_link_libraries(SamplePhysics "-framework AudioToolbox")
 	target_link_libraries(SamplePhysics "-framework AVFAudio")
+	target_link_libraries(SamplePhysics "-framework GameKit")
 else()
 	add_executable(SamplePhysics ${application_source})
 endif()
@@ -299,14 +344,16 @@ if (BUILD_IMGUI)
 	target_link_libraries(SamplePhysics Skylicht::Imgui)
 endif()
 
+# Spine runtimes
+if (BUILD_SPINE_RUNTIMES)
+	target_link_libraries(SamplePhysics Skylicht::SpineRuntimes)
+endif()
+
 # Emscripten
 if (BUILD_EMSCRIPTEN)
-	message(STATUS "Setting build in data: ${CMAKE_CURRENT_BINARY_DIR}")
-	file(COPY "${SKYLICHT_ENGINE_BIN_DIR}/BuiltIn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-	
 	message(STATUS "Setting compilation target to WASM")
 	set(CMAKE_EXECUTABLE_SUFFIX ".wasm.html")
-	set_target_properties(SamplePhysics PROPERTIES LINK_FLAGS "-s USE_SDL=2 -s USE_WEBGL2=1 -s FORCE_FILESYSTEM=1 -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS=['_main','_main_resize'] -s EXPORTED_RUNTIME_METHODS=['ccall'] --preload-file ./BuiltIn --shell-file ${template_path}/Platforms/Emscripten/Shell/shell.html --disable-shared -s WASM=1 -s BINARYEN_METHOD='native-wasm'")
+	set_target_properties(SamplePhysics PROPERTIES LINK_FLAGS "-s USE_SDL=2 -s USE_WEBGL2=1 -s FORCE_FILESYSTEM=1 -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS=['_main','_main_resize'] -s EXPORTED_RUNTIME_METHODS=['ccall'] -lwebsocket.js --preload-file ${SKYLICHT_ENGINE_BIN_DIR}/BuiltIn@ --shell-file ${template_path}/Platforms/Emscripten/Shell/shell.html --disable-shared -s WASM=1 -s BINARYEN_METHOD='native-wasm'")
 	
 	set(project_name SamplePhysics)
 	configure_file(${template_path}/Platforms/Emscripten/Index.html ${SKYLICHT_ENGINE_BIN_DIR}/Index.html)
