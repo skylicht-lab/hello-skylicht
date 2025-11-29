@@ -28,6 +28,8 @@ https://github.com/skylicht-lab/skylicht-engine
 #include <android/log.h>
 #include "JavaClassDefined.h"
 
+void applicationSetJniEnv(JNIEnv* jni);
+void applicationSetMainActivity(jobject activity);
 void applicationInitApp(int w, int h);
 void applicationLoop();
 void applicationExitApp();
@@ -51,7 +53,7 @@ int applicationOnBack();
 
 JavaVM *g_javaVM = NULL;
 JNIEnv* g_jniEnv = NULL;
-
+jobject g_activity = NULL;
 jclass g_classNativeInterface = NULL;
 
 jmethodID g_quitApplication = NULL;
@@ -84,18 +86,18 @@ JNIEXPORT void JNICALL JNI_FUNCTION(NativeInterface_mainInitApp)(JNIEnv* env, jo
 	__android_log_print(ANDROID_LOG_INFO, JNI_APPNAME, "Native Application Init");
 
 	g_jniEnv = env;
-		
+	(*g_javaVM)->AttachCurrentThread(g_javaVM, &g_jniEnv, NULL);
+
 	jclass local = (*env)->FindClass(env, JNI_CLASSNAME(NativeInterface));
 	g_classNativeInterface = (jclass)(*env)->NewGlobalRef(env, local);
 
-	(*g_javaVM)->AttachCurrentThread(g_javaVM, &g_jniEnv, NULL);
-
-	g_quitApplication = (*g_jniEnv)->GetStaticMethodID(g_jniEnv, g_classNativeInterface, "quitApplication", "()V");	
+	g_quitApplication = (*g_jniEnv)->GetStaticMethodID(g_jniEnv, g_classNativeInterface, "quitApplication", "()V");
 	g_openURL = (*g_jniEnv)->GetStaticMethodID(g_jniEnv, g_classNativeInterface, "openURL", "(Ljava/lang/String;)V");
 	g_isNetworkAvailable = (*g_jniEnv)->GetStaticMethodID(g_jniEnv, g_classNativeInterface, "isNetworkAvailable", "()Z");
 	g_systemGC = (*g_jniEnv)->GetStaticMethodID(g_jniEnv, g_classNativeInterface, "systemGC", "()V");
 
 	__android_log_print(ANDROID_LOG_INFO, JNI_APPNAME, "Init jni OK");
+	applicationSetJniEnv(env);
 	applicationInitApp(width, height);
 }
 
@@ -284,6 +286,18 @@ JNIEXPORT jboolean JNICALL JNI_FUNCTION(NativeInterface_onBack)(JNIEnv* env, job
 	if (applicationOnBack() == 1)
 		return JNI_TRUE;
 	return JNI_FALSE;
+}
+
+// native member function setMainActivity
+JNIEXPORT void JNICALL JNI_FUNCTION(NativeInterface_setMainActivity)(JNIEnv *env, jclass clazz, jobject activity)
+{
+	if (g_activity != NULL) 
+	{
+        (*env)->DeleteGlobalRef(env, g_activity);
+        g_activity = NULL;
+    }
+    g_activity = (*env)->NewGlobalRef(env, activity);
+	applicationSetMainActivity(g_activity);
 }
 
 void nativeInterface_quitApplication()
