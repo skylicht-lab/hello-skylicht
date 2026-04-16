@@ -211,7 +211,7 @@ jobs:
         run: |
           brew install libomp
           cd skylicht-engine
-          cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 -DINSTALL_LIBS=ON
+          cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 -DINSTALL_LIBS=ON
           cmake --build ./PrjMac --target install --config Release
           cd ..
 
@@ -219,7 +219,7 @@ jobs:
         run: |
           cd hello
           ls -l
-          cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
+          cmake -S . -B ./PrjMac -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64
           cd PrjMac
           xcodebuild -configuration Release
           cd ..
