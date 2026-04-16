@@ -48,6 +48,8 @@ option(BUILD_SHARED_LIBS "Use shared libraries" OFF)
 
 option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC Runtime Library DLL (/MD or /MDd)" ON)
 
+option(USE_PRECISE_FLOATINGPOINT "Use precise floating point math for synchronization" OFF)
+
 # unicode library
 add_definitions(-DUNICODE -D_UNICODE)
 
@@ -80,6 +82,22 @@ if (MSVC)
 	endif()
 
 	set(CMAKE_EXE_LINKER_FLAGS	"${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+	
+	if (USE_PRECISE_FLOATINGPOINT)
+		add_compile_options(/fp:precise)
+	else()
+		add_compile_options(/fp:fast)
+	endif()
+else()
+	# other compilers (Linux, MacOS, ...)
+	if (USE_PRECISE_FLOATINGPOINT)
+		add_compile_options(-fno-fast-math)
+		if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+			add_compile_options(-fexcess-precision=standard)
+		elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+			add_compile_options(-ffp-model=precise)
+		endif()
+	endif()
 endif()
 
 include(SkylichtLibrary.cmake)
