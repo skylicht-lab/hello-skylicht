@@ -227,8 +227,15 @@ jobs:
       - name: Unit Test
         run: |
           cd hello/PrjMac
-          ctest -C Release
-          cat Testing/Temporary/LastTest.log
+          set +e
+          ctest -C Release -VV --output-on-failure
+          TEST_RESULT=$?
+          set -e
+          if [ -f Testing/Temporary/LastTest.log ]; then
+            echo "=== Test Log ==="
+            cat Testing/Temporary/LastTest.log
+          fi
+          exit $TEST_RESULT
           cd ../..
 
       - name: Package
