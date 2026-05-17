@@ -8,6 +8,9 @@
 #import "GameViewController.h"
 #import "Renderer.h"
 
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <netinet/in.h>
+
 #include "SkylichtApplication.h"
 
 SkylichtApplication* _angleApplication = NULL;
@@ -25,6 +28,8 @@ SkylichtApplication* _angleApplication = NULL;
 	_view = (MTKView *)self.view;
 	_view.multipleTouchEnabled = YES;
 	_view.backgroundColor = UIColor.blackColor;
+	_view.preferredFramesPerSecond = 60;
+	
 	_renderer = [[Renderer alloc] initWithMetalKitView:_view];
 	
 	[_renderer mtkView:_view drawableSizeWillChange:_view.drawableSize];
@@ -78,6 +83,11 @@ SkylichtApplication* _angleApplication = NULL;
 - (void)dealloc
 {
 	delete _angleApplication;
+}
+
+- (void)setLimitFPS: (int)fps
+{
+	_view.preferredFramesPerSecond = fps;
 }
 
 #pragma mark - touches methods
@@ -160,3 +170,46 @@ SkylichtApplication* _angleApplication = NULL;
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
 }
 @end
+
+extern "C" void application_setFPS(int fps)
+{
+	UIViewController *rootVC = [[[UIApplication sharedApplication]keyWindow]rootViewController];
+	if ([rootVC isKindOfClass:[GameViewController class]])
+	{
+		GameViewController *gameVC = (GameViewController *)rootVC;
+		if (fps <= 0)
+			[gameVC setLimitFPS:60];
+		else
+			[gameVC setLimitFPS:fps];
+	}
+}
+
+extern "C" void application_openURL(const char *url)
+{
+	NSString *urlString = [NSString stringWithUTF8String:url];
+	NSURL *nsurl = [NSURL URLWithString:urlString];
+	[[UIApplication sharedApplication] openURL:nsurl options:@{} completionHandler:nil];
+}
+
+extern "C" bool application_isNetworkAvailable()
+{
+	struct sockaddr_in zeroAddress;
+	bzero(&zeroAddress, sizeof(zeroAddress));
+	zeroAddress.sin_len = sizeof(zeroAddress);
+	zeroAddress.sin_family = AF_INET;
+	
+	SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr*)&zeroAddress);
+	if (reachability != NULL)
+	{
+		SCNetworkReachabilityFlags flags;
+		bool success = SCNetworkReachabilityGetFlags(reachability, &flags);
+		CFRelease(reachability);
+		if (success)
+		{
+			bool isReachable = ((flags & kSCNetworkReachabilityFlagsReachable) != 0);
+			bool needsConnection = ((flags & kSCNetworkReachabilityFlagsConnectionRequired) != 0);
+			return (isReachable && !needsConnection);
+		}
+	}
+	return false;
+}
