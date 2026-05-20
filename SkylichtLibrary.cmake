@@ -1,7 +1,21 @@
 # Target of install library from https://github.com/skylicht-lab/skylicht-engine
 # skylicht-engine\BuildCommand\InstallLibVCPrj2022.cmd
 set(SKYLICHT_TARGETS_DIR "${SKYLICHT_ENGINE_INSTALL_DIR}/cmake/${CMAKE_SYSTEM_NAME}")
+
 set(SKYLICHT_ARCHITECTURE ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID})
+if(NOT SKYLICHT_ARCHITECTURE)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64.*|x86_64.*|AMD64.*")
+        set(SKYLICHT_ARCHITECTURE "x64")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "i686.*|i386.*|x86.*")
+        set(SKYLICHT_ARCHITECTURE "x86")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64.*|aarch64.*")
+        set(SKYLICHT_ARCHITECTURE "arm64")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm.*")
+        set(SKYLICHT_ARCHITECTURE "arm")
+    else()
+        set(SKYLICHT_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+    endif()
+endif()
 
 option(USE_SKYLICHT_SHARED_LIBS "Use skylicht shared libraries" OFF)
 option(USE_OPENMP "Use openmp for multithread optimize" ON)
