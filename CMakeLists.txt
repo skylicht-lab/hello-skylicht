@@ -71,21 +71,23 @@ else()
 	set(ENGINE_SHARED_OR_STATIC_LIB "STATIC")
 endif()
 
+if (MSVC)
+	# Select the MSVC CRT via CMake's runtime abstraction:
+	# ON  => /MD,  /MDd
+	# OFF => /MT,  /MTd
+	if (USE_MSVC_RUNTIME_LIBRARY_DLL)
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+	else()
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+		if (BUILD_SHARED_LIBS)
+		add_definitions(-DUSE_SHARED_HEAP_MEMORY)
+		endif()
+	endif()
+endif()
+
 # visual studio
 if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	
-	if (NOT USE_MSVC_RUNTIME_LIBRARY_DLL)
-		#We statically link to reduce dependancies
-		foreach(flag_var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
-			if (${flag_var} MATCHES "/MD")
-				string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-			endif (${flag_var} MATCHES "/MD")
-			if (${flag_var} MATCHES "/MDd")
-				string(REGEX REPLACE "/MDd" "/MTd" ${flag_var} "${${flag_var}}")
-			endif (${flag_var} MATCHES "/MDd")
-		endforeach()
-	endif()	
 	
 	if (CMAKE_CL_64)
 		add_definitions(-D_WIN64)

@@ -3,6 +3,9 @@ package com.skylicht.engine3d;
 import android.app.Activity;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.games.GamesSignInClient;
 import com.google.android.gms.games.PlayGames;
 import com.google.android.gms.games.PlayGamesSdk;
@@ -13,6 +16,7 @@ public class PlayGamesSignIn {
     public static PlayGamesSignIn sInstance = null;
     private GamesSignInClient mGamesSignInClient;
     private String mClientId;
+    private boolean mIsSignedIn;
 
     static public PlayGamesSignIn getInstance() {
         if (sInstance == null) sInstance = new PlayGamesSignIn();
@@ -23,6 +27,7 @@ public class PlayGamesSignIn {
         PlayGamesSdk.initialize(context);
         mClientId = context.getString(R.string.pgs_server_client_id);
         mGamesSignInClient = PlayGames.getGamesSignInClient(context);
+        mIsSignedIn = false;
         init();
     }
 
@@ -31,8 +36,10 @@ public class PlayGamesSignIn {
             mGamesSignInClient.signIn().addOnCompleteListener(task -> {
                 boolean ok = task.isSuccessful() && task.getResult().isAuthenticated();
                 if (ok) {
+                    mIsSignedIn = true;
                     requestCode(mClientId);
                 } else {
+                    mIsSignedIn = false;
                     Log.w("Skylicht", "startSignIn - failed");
                     onSignInFailed("");
                 }
@@ -51,14 +58,44 @@ public class PlayGamesSignIn {
                 Log.w("Skylicht", "requestServerSideAccess: " + gamerName);
                 onSignInSuccess(playerId, gamerName, authCode);
             }).addOnFailureListener(e -> {
+                mIsSignedIn = false;
                 Log.w("Skylicht", e.getMessage());
                 onSignInFailed(e.getMessage());
             });
         });
     }
 
+    public void startSignOut() {
+        GameInstance.Activity.runOnUiThread(() -> {
+            GoogleSignInClient signInClient = GoogleSignIn.getClient(
+                    GameInstance.Activity,
+                    GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN
+            );
+
+            signInClient.signOut()
+                    .addOnCompleteListener(task -> {
+                        mIsSignedIn = false;
+
+                        if (task.isSuccessful()) {
+                            Log.w("Skylicht", "Play Games sign out success");
+                        } else {
+                            Exception e = task.getException();
+                            Log.w("Skylicht", e != null ? e.getMessage() : "Play Games sign out failed");
+                        }
+                    });
+        });
+    }
+
     public static void signIn() {
         PlayGamesSignIn.getInstance().startSignIn();
+    }
+
+    public static void signOut() {
+        PlayGamesSignIn.getInstance().startSignOut();
+    }
+
+    public static boolean isSignedIn() {
+        return PlayGamesSignIn.getInstance().mIsSignedIn;
     }
 
     public native void init();
