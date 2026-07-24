@@ -191,6 +191,14 @@ extern "C" void application_openURL(const char *url)
 	[[UIApplication sharedApplication] openURL:nsurl options:@{} completionHandler:nil];
 }
 
+extern "C" void application_openApplicationSetting()
+{
+	NSURL* url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+	UIApplication* application = [UIApplication sharedApplication];
+	if ([application canOpenURL:url])
+		[application openURL:url options:@{} completionHandler:nil];
+}
+
 extern "C" bool application_isNetworkAvailable()
 {
 	struct sockaddr_in zeroAddress;
@@ -212,4 +220,18 @@ extern "C" bool application_isNetworkAvailable()
 		}
 	}
 	return false;
+}
+
+extern "C" const char* application_getDeviceLanguage()
+{
+	static char language[16] = "en";
+	NSString* preferredLanguage = [[NSLocale preferredLanguages] firstObject];
+	if (preferredLanguage != nil)
+	{
+		NSDictionary* components = [NSLocale componentsFromLocaleIdentifier:preferredLanguage];
+		NSString* languageCode = [components objectForKey:NSLocaleLanguageCode];
+		if (languageCode != nil && [languageCode length] > 0)
+			[languageCode getCString:language maxLength:sizeof(language) encoding:NSUTF8StringEncoding];
+	}
+	return language;
 }

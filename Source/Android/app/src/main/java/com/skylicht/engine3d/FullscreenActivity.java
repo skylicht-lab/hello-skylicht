@@ -3,6 +3,7 @@ package com.skylicht.engine3d;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
@@ -73,11 +74,24 @@ public class FullscreenActivity extends AppCompatActivity {
 
     AssetPackManager mAssetPackManager;
 
+    private final OnBackPressedCallback mBackPressedCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            if (NativeInterface.getInstance().onBack()) {
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+                setEnabled(true);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
 
         super.onCreate(savedInstanceState);
+
+        getOnBackPressedDispatcher().addCallback(this, mBackPressedCallback);
 
         // setup fullscreen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -156,10 +170,12 @@ public class FullscreenActivity extends AppCompatActivity {
 
         // Init native plugin
         PlayGamesSignIn.getInstance().init(this);
+        PlayGamesAchievement.getInstance().init(this);
         TextField.getInstance().init(this);
         Clipboard.getInstance().init(this);
         PlayStoreController.getInstance().init(this);
         InAppReview.getInstance().init(this);
+        PostNotification.getInstance().init(this);
     }
 
     @Override
@@ -237,13 +253,6 @@ public class FullscreenActivity extends AppCompatActivity {
         NativeInterface.getInstance().mainResumeApp(1);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (NativeInterface.getInstance().onBack()) {
-            super.onBackPressed();
-        }
-    }
-
     /**
      * CHECK NETWORK AVAILABLE AND OPEN URL FUNCTION
      */
@@ -263,6 +272,13 @@ public class FullscreenActivity extends AppCompatActivity {
             } catch (Exception ignored) {
 
             }
+        });
+    }
+
+    public void openApplicationSetting() {
+        FullscreenActivity.this.runOnUiThread(() -> {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
+            startActivity(intent);
         });
     }
 

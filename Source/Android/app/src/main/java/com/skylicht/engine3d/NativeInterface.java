@@ -2,6 +2,8 @@ package com.skylicht.engine3d;
 
 import android.app.Activity;
 
+import java.util.Locale;
+
 public class NativeInterface {
     public static NativeInterface sInstance = null;
 
@@ -65,11 +67,19 @@ public class NativeInterface {
         return GameInstance.Activity.isNetworkAvailable();
     }
 
+    public static String getDeviceLanguage() {
+        return Locale.getDefault().getLanguage();
+    }
+
     public static void openURL(String url) {
         GameInstance.Activity.openURL(url);
     }
 
+    public static void openApplicationSetting() {
+        GameInstance.Activity.openApplicationSetting();
+    }
+
     static {
-        System.loadLibrary("SampleGUI");
+        System.loadLibrary("SampleHelloWorld");
     }
 }
