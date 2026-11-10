@@ -87,7 +87,8 @@ jobs:
           cd skylicht-engine
           cmake -S. -BPrjLinux -DINSTALL_LIBS=ON -DBUILD_SHARED_LIBS=ON
           cmake --build ./PrjLinux --target install
-          sudo cp ./InstallLibs/lib/Linux/Shared/x64/*.so ../hello/Bin
+          mkdir -p ../hello/Bin
+          cp ./InstallLibs/lib/Linux/Shared/x86_64/*.so ../hello/Bin/
           cd ..
 
       - name: Build Project

@@ -23,6 +23,8 @@ https://github.com/skylicht-lab/skylicht-engine
 */
 
 #ifdef ANDROID
+#include <algorithm>
+
 #include <android/log.h>
 #include <jni.h>
 
@@ -39,7 +41,6 @@ extern "C" {
 
 	bool g_appRun = false;
 	bool g_appRelease = false;
-	bool g_appRestart = false;
 
 	CApplication* g_myApp = NULL;
 	IrrlichtDevice* g_irrDevice = NULL;
@@ -62,11 +63,9 @@ extern "C" {
 			g_height = height;
 		}
 
-		if (g_appRelease == true)
-		{
+		// Recreate the engine before surface resize callbacks use the new context.
+		if (g_appRelease)
 			applicationExitApp();
-			g_appRelease = false;
-		}
 
 		if (g_myApp == NULL)
 		{
@@ -83,6 +82,8 @@ extern "C" {
 			if (g_irrDevice == NULL)
 			{
 				__android_log_print(ANDROID_LOG_INFO, JNI_APPNAME, "Can not create Irrlicht Device");
+				delete g_myApp;
+				g_myApp = NULL;
 				return;
 			}
 
@@ -110,25 +111,18 @@ extern "C" {
 
 	void applicationLoop()
 	{
-		// todo restart application
-		if (g_appRestart == true)
-		{
-			// todo need release app
-			g_appRelease = true;
-			g_appRestart = false;
-
-			// restart application
+		// Fallback if a restart request has not been handled by surface creation.
+		if (g_appRelease)
 			applicationInitApp(g_width, g_height);
-		}
 
-		if (g_irrDevice->run())
+		if (g_myApp && g_irrDevice && g_irrDevice->run())
 			g_myApp->mainLoop();
 	}
 
 	void applicationRelease()
 	{
-		// notify release the app when device resume
-		g_appRestart = true;
+		// Defer teardown until a valid GL context is available again.
+		g_appRelease = true;
 	}
 
 	void applicationExitApp()
@@ -147,6 +141,7 @@ extern "C" {
 
 		g_myApp = NULL;
 		g_irrDevice = NULL;
+		g_appRelease = false;
 
 		__android_log_print(ANDROID_LOG_INFO, JNI_APPNAME, "Native Application has exited");
 	}
@@ -154,14 +149,14 @@ extern "C" {
 	void applicationPauseApp()
 	{
 		__android_log_print(ANDROID_LOG_INFO, JNI_APPNAME, "applicationPauseApp");
-		if (g_myApp)
+		if (!g_appRelease && g_myApp && g_irrDevice)
 			g_myApp->pause();
 	}
 
 	void applicationResumeApp(int showConnecting)
 	{
 		__android_log_print(ANDROID_LOG_INFO, JNI_APPNAME, "applicationResumeApp");
-		if (g_myApp)
+		if (!g_appRelease && g_myApp && g_irrDevice)
 			g_myApp->resume(showConnecting);
 	}
 
@@ -223,12 +218,11 @@ extern "C" {
 	void applicationAddAPK(const char *apkPath)
 	{
 		if (apkPath != NULL)
-			CBuildConfig::getInstance()->APKPath.push_back(apkPath);
-	}
-
-	void applicationSetDataFolder(const char *dataPath)
-	{
-		CBuildConfig::getInstance()->DataFolder = dataPath;
+		{
+			std::vector<std::string>& apkPaths = CBuildConfig::getInstance()->APKPath;
+			if (std::find(apkPaths.begin(), apkPaths.end(), apkPath) == apkPaths.end())
+				apkPaths.push_back(apkPath);
+		}
 	}
 
 	void applicationSetSaveFolder(const char *savePath)
@@ -238,7 +232,7 @@ extern "C" {
 
 	void applicationSetDownloadFolder(const char *downloadPath)
 	{
-		CBuildConfig::getInstance()->SaveFolder = downloadPath;
+		CBuildConfig::getInstance()->DataFolder = downloadPath;
 	}
 
 	void applicationSetAppID(const char *id)
