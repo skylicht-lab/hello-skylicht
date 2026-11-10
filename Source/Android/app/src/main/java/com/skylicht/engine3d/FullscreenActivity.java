@@ -8,6 +8,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.play.core.assetpacks.AssetPackLocation;
 import com.google.android.play.core.assetpacks.AssetPackManager;
@@ -18,20 +21,23 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import java.io.File;
 
@@ -40,37 +46,9 @@ import java.io.File;
  * status bar and navigation/system bar) with user interaction.
  */
 public class FullscreenActivity extends AppCompatActivity {
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
+    private final Handler mHideHandler = new Handler(Looper.getMainLooper());
     private GLES3View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-
-    private final Runnable mShowPart2Runnable = () -> {
-        // Delayed display of UI elements
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.show();
-        }
-    };
-
     private final Runnable mHideRunnable = this::hide;
-
-    boolean mVisible;
 
     AssetPackManager mAssetPackManager;
 
@@ -87,16 +65,13 @@ public class FullscreenActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-
         super.onCreate(savedInstanceState);
 
         getOnBackPressedDispatcher().addCallback(this, mBackPressedCallback);
 
         // setup fullscreen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setupFullscreenWindow();
 
         NativeInterface.getInstance().setMainActivity(this);
 
@@ -150,8 +125,7 @@ public class FullscreenActivity extends AppCompatActivity {
         NativeInterface.getInstance().setDeviceID(androidId);
 
         // set the screen size
-        DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        DisplayMetrics dm = getScreenMetrics();
         GameInstance.ScreenWidth = dm.widthPixels;
         GameInstance.ScreenHeight = dm.heightPixels;
 
@@ -159,18 +133,10 @@ public class FullscreenActivity extends AppCompatActivity {
         mContentView = new GLES3View(getApplication());
         setContentView(mContentView);
 
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-        // Code below is to handle presses of Volume up or Volume down.
-        // Without this, after pressing volume buttons, the navigation bar will
-        // show up and won't hide
-        mContentView.setOnSystemUiVisibilityChangeListener(visibility -> hide());
-
-        mVisible = true;
-
         // Init native plugin
         PlayGamesSignIn.getInstance().init(this);
         PlayGamesAchievement.getInstance().init(this);
+        PlayGamesLeaderboard.getInstance().init(this);
         TextField.getInstance().init(this);
         Clipboard.getInstance().init(this);
         PlayStoreController.getInstance().init(this);
@@ -178,10 +144,28 @@ public class FullscreenActivity extends AppCompatActivity {
         PostNotification.getInstance().init(this);
     }
 
+    private void setupFullscreenWindow() {
+        Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowManager.LayoutParams attributes = window.getAttributes();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            } else {
+                attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            }
+            window.setAttributes(attributes);
+        }
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mContentView.post(() -> mContentView.requestLayout());
+        if (mContentView != null) {
+            mContentView.post(() -> mContentView.requestLayout());
+        }
     }
 
     @Override
@@ -200,25 +184,15 @@ public class FullscreenActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mVisible = false;
 
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        hideSystemBars();
     }
 
-    /*
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+    private void hideSystemBars() {
+        WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        windowInsetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
     }
-    */
 
     /**
      * Schedules a call to hide() in delay milliseconds, canceling any
@@ -227,6 +201,24 @@ public class FullscreenActivity extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    private DisplayMetrics getScreenMetrics() {
+        DisplayMetrics dm = new DisplayMetrics();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowMetrics windowMetrics = getWindowManager().getCurrentWindowMetrics();
+            Rect bounds = windowMetrics.getBounds();
+            dm.widthPixels = bounds.width();
+            dm.heightPixels = bounds.height();
+        } else {
+            getLegacyScreenMetrics(dm);
+        }
+        return dm;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void getLegacyScreenMetrics(DisplayMetrics dm) {
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
     }
 
     /**
@@ -238,7 +230,7 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onPause();
 
         // pause native app
-        NativeInterface.getInstance().mainPauseApp();
+        mContentView.queueEvent(() -> NativeInterface.getInstance().mainPauseApp());
 
         mContentView.onPause();
     }
@@ -248,9 +240,18 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onResume();
 
         mContentView.onResume();
+        delayedHide(0);
 
         createSaveFolder();
-        NativeInterface.getInstance().mainResumeApp(1);
+        mContentView.queueEvent(() -> NativeInterface.getInstance().mainResumeApp(1));
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            delayedHide(0);
+        }
     }
 
     /**
@@ -261,7 +262,17 @@ public class FullscreenActivity extends AppCompatActivity {
     public boolean isNetworkAvailable() {
         Context context = getApplicationContext();
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
-        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+        if (connectivityManager == null) {
+            return false;
+        }
+
+        Network activeNetwork = connectivityManager.getActiveNetwork();
+        if (activeNetwork == null) {
+            return false;
+        }
+
+        NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(activeNetwork);
+        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
     }
 
     public void openURL(final String url) {
@@ -286,118 +297,54 @@ public class FullscreenActivity extends AppCompatActivity {
      * CREATE SAVE FOLDER
      */
 
-    protected boolean createFolder(String path) {
-        File folder = new File(path);
+    protected boolean createFolder(File folder) {
+        if (folder == null) {
+            return false;
+        }
 
         boolean success = true;
         if (!folder.exists()) {
-            success = folder.mkdir();
+            success = folder.mkdirs();
         }
 
         return success;
     }
 
+    protected File getStorageFolder(String type, File fallbackRoot) {
+        File folder = getApplicationContext().getExternalFilesDir(type);
+        if (folder != null) {
+            return folder;
+        }
+
+        Log.w("Skylicht", "External storage folder is unavailable: " + type);
+        if (fallbackRoot == null) {
+            return null;
+        }
+
+        return new File(fallbackRoot, type);
+    }
+
     protected void createSaveFolder() {
         // https://developer.android.com/training/data-storage
-        String dataFolder = getApplicationContext().getExternalFilesDir("data").getAbsolutePath();
+        File dataFolder = getStorageFolder("data", getFilesDir());
         if (createFolder(dataFolder)) {
-            NativeInterface.getInstance().setSaveFolder(dataFolder);
+            NativeInterface.getInstance().setSaveFolder(dataFolder.getAbsolutePath());
         } else {
             // Do something else on failure
             Log.w("Skylicht", "Can not create data folder: " + dataFolder);
         }
 
-        String downloadFolder = getApplicationContext().getExternalFilesDir("download").getAbsolutePath();
+        File downloadFolder = getStorageFolder("download", getCacheDir());
         if (createFolder(downloadFolder)) {
-            NativeInterface.getInstance().setDownloadFolder(downloadFolder);
+            NativeInterface.getInstance().setDownloadFolder(downloadFolder.getAbsolutePath());
         } else {
-            Log.w("Skylicht", "Can not create data folder: " + downloadFolder);
+            Log.w("Skylicht", "Can not create download folder: " + downloadFolder);
         }
     }
-
-    /**
-     * DISPLAY READ WRITE PERMISSION
-     */
-
-    private static final int PERM_REQUEST_READWRITE = 1;
 
     private void checkReadWritePermission() {
-        // https://github.com/copolii/runtime_permissions/blob/master/app/src/main/java/ca/mahram/android/runtimepermissions
-
-        // todo check permission
-        // enable this code if you need a permission to write STORAGE
-        /*
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            GameInstance.HaveReadWritePermission = false;
-            showPermissionRationaleDialog();
-        }
-        else {
-            GameInstance.HaveReadWritePermission = true;
-        }
-        */
-
         // In Android 4.4 (API level 19) or higher, we do not need request Write for getExternalFilesDir() folder
         GameInstance.HaveReadWritePermission = true;
-    }
-
-    private void showPermissionRationaleDialog() {
-        final DialogInterface.OnClickListener listener = (dialog, which) -> {
-            if (DialogInterface.BUTTON_POSITIVE == which) {
-                requestWritePermission();
-            }
-        };
-
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.write_access).setMessage(R.string.write_permission_rationale).setPositiveButton(android.R.string.ok, listener).setCancelable(false).create();
-        dialog.show();
-    }
-
-    ActivityResultLauncher<String> launcherPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
-        if (result) GameInstance.HaveReadWritePermission = true;
-        else onWritePermissionDenied(false);
-    });
-
-    void requestWritePermission() {
-        // ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PERM_REQUEST_READWRITE);
-        launcherPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-    }
-
-    /*
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERM_REQUEST_READWRITE) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // DENIED
-                onWritePermissionDenied(false);
-            } else {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    // OK RUN GAME
-                    GameInstance.HaveReadWritePermission = true;
-
-                } else {
-                    // SHOW ALERT
-                    onWritePermissionDenied(true);
-                }
-            }
-        }
-    }
-    */
-    void onWritePermissionDenied(boolean dontAskAgain) {
-        if (!dontAskAgain) {
-            final DialogInterface.OnClickListener listener = (dialog, which) -> {
-                if (which != DialogInterface.BUTTON_NEUTRAL) {
-                    GameInstance.Activity.finish();
-                    return;
-                }
-                runOnUiThread(() -> gotoSettings());
-            };
-
-            AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.permission_denied).setMessage(R.string.write_permission_denied).setPositiveButton(android.R.string.ok, listener).setNeutralButton(R.string.change, listener).setCancelable(false).create();
-            dialog.show();
-        } else {
-            runOnUiThread(() -> gotoSettings());
-        }
     }
 
     ActivityResultLauncher<Intent> launcherSetting = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> checkReadWritePermission());
